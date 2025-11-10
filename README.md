@@ -6,16 +6,19 @@ This directory contains test files and example Jenkinsfiles that demonstrate how
 
 ```
 test/
-├── Jenkinsfile          # Example Jenkinsfile using shared library
-├── README.md            # This file
-└── .gitkeep            # Keep folder in git
+├── Jenkinsfile              # Sample pipeline using shared library
+├── Jenkinsfile.docker-test  # Docker deployment test
+├── docker-compose.test.yml  # Test docker-compose file
+├── Dockerfile.test          # Test Dockerfile
+├── verify-setup.sh          # Setup verification script
+└── README.md                # This file
 ```
 
 ## Using the Shared Library
 
-### Example Jenkinsfile
+### Example 1: Sample Pipeline
 
-The `Jenkinsfile` in this directory demonstrates how to use the shared library:
+The `Jenkinsfile` demonstrates basic usage:
 
 ```groovy
 @Library('shared-jenkins-library') _
@@ -26,11 +29,76 @@ samplePipeline(
 )
 ```
 
+### Example 2: Docker Deployment Test
+
+The `Jenkinsfile.docker-test` demonstrates Docker deployment:
+
+```groovy
+@Library('shared-jenkins-library') _
+
+dockerPipeline(
+    dockerImage: 'test-app',
+    appPort: '8080',
+    infisicalPath: '/test-app/',
+    healthCheckUrl: '/health'
+)
+```
+
+## Docker Deployment Test
+
+To test Docker deployment:
+
+1. **Ensure you have:**
+   - `Dockerfile.test` - Test Dockerfile
+   - `docker-compose.test.yml` - Test docker-compose file
+   - `.env` file (will be created from Infisical)
+
+2. **Configure Jenkins job:**
+   - Use `Jenkinsfile.docker-test` as the pipeline script
+   - Ensure the shared library is configured in Jenkins
+
+3. **Run the job:**
+   - Jenkins will build the test Docker image
+   - Deploy using docker-compose
+   - Run health checks
+   - Clean up old images
+
+## Test Application
+
+The test application (`Dockerfile.test`) is a simple Python HTTP server that:
+- Runs on port 8080
+- Provides a `/health` endpoint
+- Returns "OK" for health checks
+- Displays "Test App Running" on the root path
+
 ## Available Pipeline Functions
+
+### dockerPipeline
+
+Universal Docker deployment pipeline for all bayes applications.
+
+**Usage:**
+```groovy
+@Library('shared-jenkins-library') _
+
+dockerPipeline(
+    dockerImage: 'my-app',
+    appPort: '8080',
+    infisicalPath: '/my-app/',
+    healthCheckUrl: '/health'
+)
+```
+
+**Key Features:**
+- ✅ Infisical secret injection
+- ✅ Docker image building
+- ✅ Docker Compose or Docker Run deployment
+- ✅ Health checks
+- ✅ Image cleanup
 
 ### samplePipeline
 
-A simple example pipeline function for testing.
+A sample pipeline function for testing.
 
 **Usage:**
 ```groovy
@@ -42,32 +110,19 @@ samplePipeline(
 )
 ```
 
-**Parameters:**
-- `message` (optional): Custom message to display
-- `environment` (optional): Environment name (default: 'dev')
-- `buildNumber` (optional): Build number (default: Jenkins BUILD_NUMBER)
+## Verification
 
-## Testing the Library
+Run the verification script to check your setup:
 
-1. Configure the shared library in Jenkins:
-   - Go to **Manage Jenkins** → **Configure System**
-   - Scroll to **Global Pipeline Libraries**
-   - Add library:
-     - **Name**: `shared-jenkins-library`
-     - **Default version**: `main`
-     - **Source**: Your Git repository URL
+```bash
+./verify-setup.sh
+```
 
-2. Create a Jenkins job that uses this Jenkinsfile
-
-3. Run the job to test the shared library
-
-## Adding More Pipeline Functions
-
-To add more pipeline functions:
-
-1. Create a new `.groovy` file in `/home/samson-safari/bayes/shared-jenkins-library/vars/`
-2. Create a corresponding `.txt` file for help documentation
-3. Use the function in your Jenkinsfiles with `@Library('shared-jenkins-library') _`
+This will verify:
+- Shared library repository structure
+- Test repository structure
+- Required files exist
+- Configuration checklist
 
 ## See Also
 
