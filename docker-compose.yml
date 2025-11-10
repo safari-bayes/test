@@ -1,0 +1,29 @@
+services:
+  api:
+    image: test-app:latest
+    container_name: test-app
+    pull_policy: never
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - API_HOST=0.0.0.0
+      - API_PORT=8080
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - test-app-network
+
+networks:
+  test-app-network:
+    driver: bridge
+

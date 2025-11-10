@@ -1,0 +1,43 @@
+# Test Dockerfile for Docker deployment testing
+FROM python:3.11-slim
+
+# Install curl for health checks
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Create a simple test application
+RUN echo '#!/usr/bin/env python3\n\
+from http.server import HTTPServer, BaseHTTPRequestHandler\n\
+import os\n\
+\n\
+class HealthHandler(BaseHTTPRequestHandler):\n\
+    def do_GET(self):\n\
+        if self.path == "/health":\n\
+            self.send_response(200)\n\
+            self.send_header("Content-type", "text/plain")\n\
+            self.end_headers()\n\
+            self.wfile.write(b"OK")\n\
+        else:\n\
+            self.send_response(200)\n\
+            self.send_header("Content-type", "text/html")\n\
+            self.end_headers()\n\
+            self.wfile.write(b"<h1>Test App Running</h1>")\n\
+    def log_message(self, format, *args):\n\
+        pass\n\
+\n\
+if __name__ == "__main__":\n\
+    port = int(os.getenv("API_PORT", "8080"))\n\
+    server = HTTPServer(("0.0.0.0", port), HealthHandler)\n\
+    print(f"Test app running on port {port}")\n\
+    server.serve_forever()' > app.py && chmod +x app.py
+
+# Expose port
+EXPOSE 8080
+
+# Run the test app
+CMD ["python", "app.py"]
+

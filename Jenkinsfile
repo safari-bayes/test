@@ -1,11 +1,17 @@
-// Test Jenkinsfile that consumes the shared library
-// This demonstrates how to use the shared-jenkins-library
+// Test Jenkinsfile that uses dockerPipeline from the shared library
+// This demonstrates Docker deployment using the shared library
 
 @Library('shared-jenkins-library') _
 
-// Use the sample pipeline from the shared library
-samplePipeline(
-    message: 'Hello from test folder! This is a test of the shared library.',
-    environment: 'test'
+dockerPipeline(
+    dockerImage: 'test-app',
+    appPort: '8080',
+    containerName: 'test-app',
+    infisicalPath: '/test-app/',
+    deploymentMethod: 'docker-compose',
+    infisicalMethod: 'export',
+    healthCheckUrl: '/health',
+    healthCheckWait: '30',
+    cleanupOldImages: true,
+    keepImageVersions: '3'
 )
-
