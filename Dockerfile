@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
+# Set working directorys
 WORKDIR /app
 
 # Create a simple test applicationss
