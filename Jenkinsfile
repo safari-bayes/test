@@ -7,13 +7,13 @@ dockerPipeline(
     dockerImage: 'test-app',
     appPort: '8080',
     containerName: 'test-app',
-    infisicalPath: '/test-app/',
+    infisicalPath: '/kplc-web-application/',
     deploymentMethod: 'docker-compose',
-    infisicalMethod: 'export',
     healthCheckUrl: '/health',
     healthCheckWait: '30',
     cleanupOldImages: true,
-    keepImageVersions: '3'
+    keepImageVersions: '3',
+    project: 'afcen'
 )
 
 // Note: This test requires:
