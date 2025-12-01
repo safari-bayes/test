@@ -61,3 +61,6 @@ echo "  Jenkins → Manage Jenkins → Configure System"
 echo "  → Global Pipeline Libraries → Add"
 echo "=========================================="
 
+
+
+

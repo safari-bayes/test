@@ -4,14 +4,9 @@
 @Library('shared-jenkins-library') _
 
 dockerPipeline(
-    dockerImage: 'test-app',
-    appPort: '8080',
-    containerName: 'test-app',
-    infisicalPath: '/test-app/',
-    deploymentMethod: 'docker-compose',
-    infisicalMethod: 'export',
-    healthCheckUrl: '/health',
-    healthCheckWait: '30',
-    cleanupOldImages: true,
-    keepImageVersions: '3'
+    dockerImage: 'test-image',
+    appPort: '3000',
+    project: 'kplc',                    // Exact match → correct agent
+    healthCheckUrl: '/health'
+
 )

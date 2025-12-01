@@ -1,0 +1,15 @@
+@Library('jenkins-shared-library') _
+
+dockerPipeline(
+    appName: 'kplc',
+    dockerImage: 'kplc-web-application',
+    appPort: '3000',
+    containerName: 'kplc-web-application',
+    infisicalPath: '/kplc-web-application/',
+    deploymentMethod: 'docker-compose',
+    healthCheckUrl: '/',
+    healthCheckWait: '30',
+    cleanupOldImages: true,
+    keepImageVersions: '3'
+)
+

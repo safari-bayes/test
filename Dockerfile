@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Set working directory
 WORKDIR /app
 
-# Create a simple test application
+# Create a simple test applications
 RUN echo '#!/usr/bin/env python3\n\
 from http.server import HTTPServer, BaseHTTPRequestHandler\n\
 import os\n\
