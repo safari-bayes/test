@@ -1,0 +1,10 @@
+// Test Jenkinsfile using samplePipeline to verify shared library works
+// Use this first to test that the library is properly configured
+
+@Library('shared-jenkins-library') _
+
+samplePipeline(
+    message: 'Testing shared library connection',
+    environment: 'dev'
+)
+
