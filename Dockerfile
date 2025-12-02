@@ -6,17 +6,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directorys
+# Set working directory
 WORKDIR /app
 
-# Create a simple test applicationssssss
+# Create a simple test application
 RUN echo '#!/usr/bin/env python3\n\
 from http.server import HTTPServer, BaseHTTPRequestHandler\n\
 import os\n\
 \n\
 class HealthHandler(BaseHTTPRequestHandler):\n\
     def do_GET(self):\n\
-        if self.path == "/health":\n\
+        path = self.path.split("?")[0].rstrip("/")\n\
+        if path == "/health":\n\
             self.send_response(200)\n\
             self.send_header("Content-type", "text/plain")\n\
             self.end_headers()\n\
