@@ -14,6 +14,7 @@ dockerPipeline(
     cleanupOldImages: true,
     keepImageVersions: '3',
     project: 'afcen'
+    healthCheckUrl: '/health'
 )
 
 // Note: This test requires:ss
