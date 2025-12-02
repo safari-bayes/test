@@ -17,7 +17,7 @@ dockerPipeline(
 )
 
 // Note: This test requires:ssnszgss
-// - Dockerfile.test (test Dockerfile)azssss
+// - Dockerfile.test (test Dockerfile)azsssss
 // - docker-compose.test.yml (rename to docker-compose.yml or use -f flag)
 // - .env file (will be created from Infisical)
 
