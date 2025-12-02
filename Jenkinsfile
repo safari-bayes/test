@@ -9,7 +9,6 @@ dockerPipeline(
     containerName: 'test-app',
     infisicalPath: '/kplc-web-application/',
     deploymentMethod: 'docker-compose',
-    healthCheckUrl: '/health',
     healthCheckWait: '30',
     cleanupOldImages: true,
     keepImageVersions: '3',
