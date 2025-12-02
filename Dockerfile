@@ -36,7 +36,7 @@ if __name__ == "__main__":\n\
     print(f"Test app running on port {port}")\n\
     server.serve_forever()' > app.py && chmod +x app.py
 
-# Expose portszsssddsd
+# Expose portszsssddsds
 EXPOSE 8080
 
 # Run the test app
