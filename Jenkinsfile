@@ -16,7 +16,7 @@ dockerPipeline(
     healthCheckUrl: '/health'
 )
 
-// Note: This test requires:ssn
+// Note: This test requires:ssns
 // - Dockerfile.test (test Dockerfile)
 // - docker-compose.test.yml (rename to docker-compose.yml or use -f flag)
 // - .env file (will be created from Infisical)
