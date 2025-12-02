@@ -16,7 +16,7 @@ dockerPipeline(
     healthCheckUrl: '/health'
 )
 
-// Note: This test requires:ssnszgssas
+// Note: This test requires:ssnszgssasa
 // - Dockerfile.test (test Dockerfile)azass
 // - docker-compose.test.yml (rename to docker-compose.ysml or use -f flag)
 // - .env file (will be created from Infisical)
