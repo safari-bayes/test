@@ -13,7 +13,7 @@ dockerPipeline(
     healthCheckWait: '30',
     cleanupOldImages: true,
     keepImageVersions: '3',
-    project: 'afcen'
+    project: 'afcen',
     healthCheckUrl: '/health'
 )
 
