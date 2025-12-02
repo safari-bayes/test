@@ -16,7 +16,7 @@ dockerPipeline(
     project: 'afcen'
 )
 
-// Note: This test requires:ssa
+// Note: This test requires:ssas
 // - Dockerfile.test (test Dockerfile)
 // - docker-compose.test.yml (rename to docker-compose.yml or use -f flag)
 // - .env file (will be created from Infisical)
