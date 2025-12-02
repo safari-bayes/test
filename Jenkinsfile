@@ -7,7 +7,7 @@ dockerPipeline(
     dockerImage: 'test-app',
     appPort: '8080',
     containerName: 'test-app',
-    infisicalPath: '/kplc-web-application/',
+    infisicalPath: '/afcen-landing-page/',
     deploymentMethod: 'docker-compose',
     healthCheckWait: '30',
     cleanupOldImages: true,
