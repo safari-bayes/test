@@ -5,7 +5,7 @@
 
 dockerPipeline(
     dockerImage: 'test-app',
-    appPort: '8080',
+    appPort: '80800',
     containerName: 'test-app',
     infisicalPath: '/afcen-landing-page/',
     deploymentMethod: 'docker-compose',
