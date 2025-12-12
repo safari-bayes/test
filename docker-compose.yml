@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: Dockerfile.test
     ports:
-      - "8080:8080"
+      - "50800:8080"
     env_file:
       - .env
     environment:
