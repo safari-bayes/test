@@ -16,7 +16,7 @@ services:
     image: mailhog/mailhog
     restart: always
     ports:
-      - "1025:1025" # SMTPs
+      - "1025:1025" # SMTPss
       - "8025:8025" # Web UI
 
   redis:
