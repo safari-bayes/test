@@ -4,9 +4,9 @@
 @Library('shared-jenkins-library') _
 
 dockerPipeline(
-    dockerImage: 'test-app',
+    dockerImage: 'test-app-final',
     appPort: '50800',
-    containerName: 'test-app',
+    containerName: 'test-app-final',
     infisicalPath: '/afcen-landing-page/',
     deploymentMethod: 'docker-compose',
     healthCheckWait: '30',
