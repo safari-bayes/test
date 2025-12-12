@@ -5,7 +5,7 @@
 
 dockerPipeline(
     dockerImage: 'test-app',
-    appPort: '80800',
+    appPort: '50800',
     containerName: 'test-app',
     infisicalPath: '/afcen-landing-page/',
     deploymentMethod: 'docker-compose',
@@ -15,8 +15,8 @@ dockerPipeline(
     project: 'afcen',
     healthCheckUrl: '/health',
     sonarScan: true,
-    sonarProjectKey: 'afcen-landing-page',
-    sonarProjectName: 'afcen-landing-page'
+    sonarProjectKey: 'test-project',
+    sonarProjectName: 'test-project'
 )
 
 // Note: This test requires:ssnszgssasassss
