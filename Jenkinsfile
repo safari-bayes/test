@@ -13,7 +13,10 @@ dockerPipeline(
     cleanupOldImages: true,
     keepImageVersions: '3',
     project: 'afcen',
-    healthCheckUrl: '/health'
+    healthCheckUrl: '/health',
+    sonarScan: true,
+    sonarProjectKey: 'afcen-landing-page',
+    sonarProjectName: 'afcen-landing-page'
 )
 
 // Note: This test requires:ssnszgssasassss
