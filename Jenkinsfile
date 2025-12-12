@@ -4,16 +4,19 @@
 @Library('shared-jenkins-library') _
 
 dockerPipeline(
-    dockerImage: 'test-app',
-    appPort: '8080',
-    containerName: 'test-app',
+    dockerImage: 'test-app-final',
+    appPort: '50800',
+    containerName: 'test-app-final',
     infisicalPath: '/afcen-landing-page/',
     deploymentMethod: 'docker-compose',
     healthCheckWait: '30',
     cleanupOldImages: true,
     keepImageVersions: '3',
     project: 'afcen',
-    healthCheckUrl: '/health'
+    healthCheckUrl: '/health',
+    sonarScan: true,
+    sonarProjectKey: 'test-project',
+    sonarProjectName: 'test-project'
 )
 
 // Note: This test requires:ssnszgssasassss

@@ -1,13 +1,13 @@
 services:
   api:
-    image: test-app:latest
-    container_name: test-app
+    image: test-app-final:latest
+    container_name: test-app-final
     pull_policy: never
     build:
       context: .
       dockerfile: Dockerfile.test
     ports:
-      - "8080:8080"
+      - "50800:8080"
     env_file:
       - .env
     environment:
@@ -21,9 +21,9 @@ services:
       retries: 3
       start_period: 10s
     networks:
-      - test-app-network
+      - test-app-final-network
 
 networks:
-  test-app-network:
+  test-app-final-network:
     driver: bridge
 
