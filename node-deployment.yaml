@@ -21,7 +21,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: node-test
-          image: ghcr.io/samson-safari/node-app:latest
+          image: ghcr.io/samson-safari/node-app:placeholder
           ports:
             - containerPort: 3000
           resources:

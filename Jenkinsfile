@@ -87,6 +87,14 @@ pipeline {
                     export PATH="\$HOME/bin:\$PATH"
                     echo "Creating namespace if it doesn't exist..."
                     kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+
+                    echo "Ensuring image pull secret exists in namespace..."
+                    kubectl get secret ghcr-secret --namespace=${K8S_NAMESPACE} 2>/dev/null || \
+                    kubectl get secret ghcr-secret --namespace=default -o yaml | \
+                    sed "s/namespace: default/namespace: ${K8S_NAMESPACE}/" | \
+                    kubectl apply -f - 2>/dev/null || \
+                    echo "Warning: Could not copy image pull secret to ${K8S_NAMESPACE} namespace"
+
                     echo "Applying Kubernetes manifests..."
                     kubectl apply -f node-deployment.yaml --namespace=${K8S_NAMESPACE}
                     kubectl apply -f node-service.yaml --namespace=${K8S_NAMESPACE}
