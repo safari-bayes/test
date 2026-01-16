@@ -66,6 +66,18 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 echo 'Deploying to Kubernetes cluster...'
+                sh '''
+                # Install kubectl if not present
+                if ! command -v kubectl &> /dev/null; then
+                    echo "Installing kubectl..."
+                    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                    chmod +x kubectl
+                    sudo mv kubectl /usr/local/bin/
+                    echo "kubectl installed successfully"
+                else
+                    echo "kubectl already installed"
+                fi
+                '''
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                     sh """
                     echo "Applying Kubernetes manifests..."
@@ -123,6 +135,16 @@ pipeline {
             script {
                 echo "Checking cluster status for debugging..."
                 try {
+                    sh '''
+                    # Ensure kubectl is available for debugging
+                    if ! command -v kubectl &> /dev/null; then
+                        echo "Installing kubectl for debugging..."
+                        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                        chmod +x kubectl
+                        sudo mv kubectl /usr/local/bin/ 2>/dev/null || mv kubectl /usr/local/bin/
+                        echo "kubectl installed for debugging"
+                    fi
+                    '''
                     withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                         sh """
                         kubectl get pods --namespace=${K8S_NAMESPACE} -l app=${APP_LABEL} || true
