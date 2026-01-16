@@ -85,7 +85,7 @@ pipeline {
         stage('Verify Deployment') {
             steps {
                 echo 'Verifying deployment...'
-                withCredentials([file(credentialsId: 'jenkins-kubeconfig.yaml', variable: 'KUBECONFIG')]) {
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                     sh """
                     echo "Checking pod status..."
                     kubectl get pods --namespace=${K8S_NAMESPACE} -l app=${APP_LABEL}
@@ -123,7 +123,7 @@ pipeline {
             script {
                 echo "Checking cluster status for debugging..."
                 try {
-                    withCredentials([file(credentialsId: 'jenkins-kubeconfig.yaml', variable: 'KUBECONFIG')]) {
+                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                         sh """
                         kubectl get pods --namespace=${K8S_NAMESPACE} -l app=${APP_LABEL} || true
                         kubectl describe deployment ${DEPLOYMENT_NAME} --namespace=${K8S_NAMESPACE} || true
