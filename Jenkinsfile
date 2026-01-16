@@ -134,7 +134,7 @@ pipeline {
         }
         failure {
             echo '❌ Pipeline failed!'
-            script {
+            script {//ee
                 echo "Checking cluster status for debugging..."
                 try {
                     sh '''
