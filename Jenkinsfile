@@ -84,6 +84,7 @@ pipeline {
                 '''
                 withKubeConfig([credentialsId: 'kubeconfig', restrictKubeConfigAccess: false]) {
                     sh """
+                    export PATH="\$HOME/bin:\$PATH"
                     echo "Applying Kubernetes manifests..."
                     kubectl apply -f node-deployment.yaml --namespace=${K8S_NAMESPACE}
                     kubectl apply -f node-service.yaml --namespace=${K8S_NAMESPACE}
@@ -115,6 +116,7 @@ pipeline {
                 '''
                 withKubeConfig([credentialsId: 'kubeconfig', restrictKubeConfigAccess: false]) {
                     sh """
+                    export PATH="\$HOME/bin:\$PATH"
                     echo "Checking pod status..."
                     kubectl get pods --namespace=${K8S_NAMESPACE} -l app=${APP_LABEL}
 
@@ -165,6 +167,7 @@ pipeline {
                     '''
                     withKubeConfig([credentialsId: 'kubeconfig', restrictKubeConfigAccess: false]) {
                         sh """
+                        export PATH="\$HOME/bin:\$PATH"
                         kubectl get pods --namespace=${K8S_NAMESPACE} -l app=${APP_LABEL} || true
                         kubectl describe deployment ${DEPLOYMENT_NAME} --namespace=${K8S_NAMESPACE} || true
                         """
