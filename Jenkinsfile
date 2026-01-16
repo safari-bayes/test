@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         DOCKER_REGISTRY = 'ghcr.io'
+        DOCKER_USERNAME = 'samson-safari'
         DOCKER_IMAGE = 'node-app'
         K8S_NAMESPACE = 'default'
         DEPLOYMENT_NAME = 'node-test'
@@ -50,7 +51,7 @@ pipeline {
         stage('Docker Push') {
             steps {
                 echo 'Pushing Docker image to registry...'
-                withCredentials([usernamePassword(credentialsId: 'safari-bayes', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                withCredentials([usernamePassword(credentialsId: 'safari-bayes', passwordVariable: 'DOCKER_PASSWORD')]) {
                     sh """
                     echo "\$DOCKER_PASSWORD" | docker login \$DOCKER_REGISTRY -u "\$DOCKER_USERNAME" --password-stdin
                     echo "Docker login successful"
@@ -65,7 +66,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 echo 'Deploying to Kubernetes cluster...'
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                withCredentials([file(credentialsId: 'kubeconfig.yaml', variable: 'KUBECONFIG')]) {
                     sh """
                     echo "Applying Kubernetes manifests..."
                     kubectl apply -f node-deployment.yaml --namespace=${K8S_NAMESPACE}
