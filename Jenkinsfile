@@ -5,7 +5,7 @@ pipeline {
         DOCKER_REGISTRY = 'ghcr.io'
         DOCKER_USERNAME = 'safari-bayes'
         DOCKER_IMAGE = 'node-app'
-        K8S_NAMESPACE = 'default'
+        K8S_NAMESPACE = 'afcen'
         DEPLOYMENT_NAME = 'node-test'
         APP_LABEL = 'node-test'
         DOCKER_TAG = "${env.BUILD_NUMBER ?: 'latest'}"
@@ -85,6 +85,8 @@ pipeline {
                 withKubeConfig([credentialsId: 'kubeconfig', restrictKubeConfigAccess: false]) {
                     sh """
                     export PATH="\$HOME/bin:\$PATH"
+                    echo "Creating namespace if it doesn't exist..."
+                    kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
                     echo "Applying Kubernetes manifests..."
                     kubectl apply -f node-deployment.yaml --namespace=${K8S_NAMESPACE}
                     kubectl apply -f node-service.yaml --namespace=${K8S_NAMESPACE}
