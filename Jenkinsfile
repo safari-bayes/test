@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_REGISTRY = 'ghcr.io'
-        DOCKER_USERNAME = 'sam'
+        DOCKER_USERNAME = 'safari-bayes'
         DOCKER_IMAGE = 'node-app'
         K8S_NAMESPACE = 'default'
         DEPLOYMENT_NAME = 'node-test'
