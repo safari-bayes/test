@@ -65,7 +65,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 echo 'Deploying to Kubernetes cluster...'
-                withCredentials([file(credentialsId: 'jenkins-kubeconfig.yaml', variable: 'KUBECONFIG')]) {
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                     sh """
                     echo "Applying Kubernetes manifests..."
                     kubectl apply -f node-deployment.yaml --namespace=${K8S_NAMESPACE}
