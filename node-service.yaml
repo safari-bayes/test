@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: node-test-service
+  namespace: afcen
 spec:
   type: NodePort
   selector:
