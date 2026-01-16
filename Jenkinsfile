@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_REGISTRY = 'ghcr.io'
-        DOCKER_USERNAME = 'samson-safari'
+        DOCKER_USERNAME = 'sam'
         DOCKER_IMAGE = 'node-app'
         K8S_NAMESPACE = 'default'
         DEPLOYMENT_NAME = 'node-test'
@@ -66,7 +66,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 echo 'Deploying to Kubernetes cluster...'
-                withCredentials([file(credentialsId: 'kubeconfig.yaml', variable: 'KUBECONFIG')]) {
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                     sh """
                     echo "Applying Kubernetes manifests..."
                     kubectl apply -f node-deployment.yaml --namespace=${K8S_NAMESPACE}
