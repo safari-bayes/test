@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-test
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: node-test
+  template:
+    metadata:
+      labels:
+        app: node-test
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+        - name: node-test
+          image: ghcr.io/safari-bayes/node-app:1.1
+          ports:
+            - containerPort: 3000
