@@ -15,9 +15,7 @@ pipeline {
         timeout(time: 30, unit: 'MINUTES')
         disableConcurrentBuilds()
     }
-  tools {
-    kubectl 'kubectl-latest'
-  }
+
 
     stages {
         stage('Checkout') {
