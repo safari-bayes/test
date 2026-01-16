@@ -82,29 +82,33 @@ pipeline {
                     echo "kubectl already available"
                 fi
                 '''
-                withKubeConfig([credentialsId: 'kubeconfig', restrictKubeConfigAccess: false]) {
-                    sh """
-                    export PATH="\$HOME/bin:\$PATH"
-                    echo "Creating namespace if it doesn't exist..."
-                    kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+                withCredentials([usernamePassword(credentialsId: 'Token', usernameVariable: 'DUMMY_USER', passwordVariable: 'DOCKER_TOKEN')]) {
+                    withKubeConfig([credentialsId: 'kubeconfig', restrictKubeConfigAccess: false]) {
+                        sh """
+                        export PATH="\$HOME/bin:\$PATH"
+                        echo "Creating namespace if it doesn't exist..."
+                        kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
 
-                    echo "Ensuring image pull secret exists in namespace..."
-                    kubectl get secret ghcr-secret --namespace=${K8S_NAMESPACE} 2>/dev/null || \
-                    kubectl get secret ghcr-secret --namespace=default -o yaml | \
-                    sed "s/namespace: default/namespace: ${K8S_NAMESPACE}/" | \
-                    kubectl apply -f - 2>/dev/null || \
-                    echo "Warning: Could not copy image pull secret to ${K8S_NAMESPACE} namespace"
+                        echo "Creating image pull secret in namespace..."
+                        kubectl create secret docker-registry ghcr-secret \
+                          --docker-server=ghcr.io \
+                          --docker-username=samson-safari \
+                          --docker-password=\${DOCKER_TOKEN} \
+                          --namespace=${K8S_NAMESPACE} \
+                          --dry-run=client -o yaml | kubectl apply -f - || \
+                        echo "Image pull secret already exists or failed to create"
 
-                    echo "Applying Kubernetes manifests..."
-                    kubectl apply -f node-deployment.yaml --namespace=${K8S_NAMESPACE}
-                    kubectl apply -f node-service.yaml --namespace=${K8S_NAMESPACE}
+                        echo "Applying Kubernetes manifests..."
+                        kubectl apply -f node-deployment.yaml --namespace=${K8S_NAMESPACE}
+                        kubectl apply -f node-service.yaml --namespace=${K8S_NAMESPACE}
 
-                    echo "Updating deployment image..."
-                    kubectl set image deployment/${DEPLOYMENT_NAME} ${DEPLOYMENT_NAME}=${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${DOCKER_IMAGE}:${DOCKER_TAG} --namespace=${K8S_NAMESPACE}
+                        echo "Updating deployment image..."
+                        kubectl set image deployment/${DEPLOYMENT_NAME} ${DEPLOYMENT_NAME}=${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${DOCKER_IMAGE}:${DOCKER_TAG} --namespace=${K8S_NAMESPACE}
 
-                    echo "Waiting for rollout to complete..."
-                    kubectl rollout status deployment/${DEPLOYMENT_NAME} --namespace=${K8S_NAMESPACE} --timeout=300s
-                    """
+                        echo "Waiting for rollout to complete..."
+                        kubectl rollout status deployment/${DEPLOYMENT_NAME} --namespace=${K8S_NAMESPACE} --timeout=300s
+                        """
+                    }
                 }
             }
         }

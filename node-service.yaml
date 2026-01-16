@@ -10,4 +10,4 @@ spec:
   ports:
     - port: 3000        # internal cluster port
       targetPort: 3000  # container port
-      nodePort: 30081   # external port
+      nodePort: 30082   # external port
