@@ -51,9 +51,9 @@ pipeline {
         stage('Docker Push') {
             steps {
                 echo 'Pushing Docker image to registry...'
-                withCredentials([usernamePassword(credentialsId: 'safari-bayes', passwordVariable: 'DOCKER_PASSWORD')]) {
+                withCredentials([string(credentialsId: 'safari-bayes', variable: 'DOCKER_TOKEN')]) {
                     sh """
-                    echo "\$DOCKER_PASSWORD" | docker login \$DOCKER_REGISTRY -u "\$DOCKER_USERNAME" --password-stdin
+                    echo "\$DOCKER_TOKEN" | docker login \$DOCKER_REGISTRY -u "\$DOCKER_USERNAME" --password-stdin
                     echo "Docker login successful"
                     docker push \${DOCKER_REGISTRY}/\${DOCKER_USERNAME}/\${DOCKER_IMAGE}:\${DOCKER_TAG}
                     docker push \${DOCKER_REGISTRY}/\${DOCKER_USERNAME}/\${DOCKER_IMAGE}:latest
