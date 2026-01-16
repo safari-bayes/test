@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_REGISTRY = 'ghcr.io'
-        DOCKER_USERNAME = 'samson-safari'
+        DOCKER_USERNAME = 'sam'
         DOCKER_IMAGE = 'node-app'
         K8S_NAMESPACE = 'default'
         DEPLOYMENT_NAME = 'node-test'
@@ -51,9 +51,9 @@ pipeline {
         stage('Docker Push') {
             steps {
                 echo 'Pushing Docker image to registry...'
-                withCredentials([string(credentialsId: 'safari-bayes', variable: 'DOCKER_TOKEN')]) {
+                withCredentials([usernamePassword(credentialsId: 'safari-bayes', passwordVariable: 'DOCKER_PASSWORD')]) {
                     sh """
-                    echo "\$DOCKER_TOKEN" | docker login \$DOCKER_REGISTRY -u "\$DOCKER_USERNAME" --password-stdin
+                    echo "\$DOCKER_PASSWORD" | docker login \$DOCKER_REGISTRY -u "\$DOCKER_USERNAME" --password-stdin
                     echo "Docker login successful"
                     docker push \${DOCKER_REGISTRY}/\${DOCKER_USERNAME}/\${DOCKER_IMAGE}:\${DOCKER_TAG}
                     docker push \${DOCKER_REGISTRY}/\${DOCKER_USERNAME}/\${DOCKER_IMAGE}:latest
