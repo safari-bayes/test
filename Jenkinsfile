@@ -72,10 +72,12 @@ pipeline {
                 # Install kubectl if not present
                 if ! command -v kubectl &> /dev/null; then
                     echo "Installing kubectl..."
+                    mkdir -p ~/bin
                     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
                     chmod +x kubectl
-                    sudo mv kubectl /usr/local/bin/ 2>/dev/null || mv kubectl /usr/local/bin/
-                    echo "kubectl installed successfully"
+                    mv kubectl ~/bin/
+                    export PATH="$HOME/bin:$PATH"
+                    echo "kubectl installed successfully to ~/bin"
                 else
                     echo "kubectl already available"
                 fi
@@ -103,10 +105,12 @@ pipeline {
                 # Ensure kubectl is available
                 if ! command -v kubectl &> /dev/null; then
                     echo "Installing kubectl..."
+                    mkdir -p ~/bin
                     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
                     chmod +x kubectl
-                    sudo mv kubectl /usr/local/bin/ 2>/dev/null || mv kubectl /usr/local/bin/
-                    echo "kubectl installed successfully"
+                    mv kubectl ~/bin/
+                    export PATH="$HOME/bin:$PATH"
+                    echo "kubectl installed successfully to ~/bin"
                 fi
                 '''
                 withKubeConfig([credentialsId: 'kubeconfig', restrictKubeConfigAccess: false]) {
@@ -151,10 +155,12 @@ pipeline {
                     # Ensure kubectl is available for debugging
                     if ! command -v kubectl &> /dev/null; then
                         echo "Installing kubectl for debugging..."
+                        mkdir -p ~/bin
                         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
                         chmod +x kubectl
-                        sudo mv kubectl /usr/local/bin/ 2>/dev/null || mv kubectl /usr/local/bin/
-                        echo "kubectl installed for debugging"
+                        mv kubectl ~/bin/
+                        export PATH="$HOME/bin:$PATH"
+                        echo "kubectl installed for debugging to ~/bin"
                     fi
                     '''
                     withKubeConfig([credentialsId: 'kubeconfig', restrictKubeConfigAccess: false]) {
