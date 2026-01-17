@@ -1,0 +1,109 @@
+// Use shared Jenkins library for Docker deployment pipeline
+@Library('shared-jenkins-library') _
+
+dockerPipeline(
+    // Docker configuration
+    dockerImage: 'node-app',
+    appPort: '8080',
+
+    // Deployment method - Kubernetes
+    deploymentMethod: 'kubernetes',
+
+    // Kubernetes configuration
+    k8sNamespace: 'afcen',
+    k8sDeploymentName: 'node-test',
+    k8sAppLabel: 'node-test',
+    k8sServiceType: 'NodePort',
+    k8sReplicas: 1,
+
+    // Build configuration
+    technology: 'node',
+    buildTimeout: 30,
+
+    // Health check configuration
+    healthCheckUrl: '/health',
+    healthCheckWait: '30',
+    healthCheckTimeout: 5,
+
+    // Security scanning
+    securityScan: true,
+    failOnSecurity: false,
+
+    // Cleanup configuration
+    cleanupOldImages: true,
+    keepImageVersions: '3'
+)
+
+pipeline {
+    agent none
+
+    post {
+        success {
+            echo '🎉 Pipeline completed successfully!'
+            echo "Application deployed to Kubernetes namespace: afcen"
+            echo "Service available on NodePort - check kubectl get svc node-test-service"
+        }
+        failure {
+            echo '❌ Pipeline failed!'
+            script {
+                echo "Checking cluster status for debugging..."
+                try {
+                    withKubeConfig([credentialsId: 'kubeconfig', restrictKubeConfigAccess: false]) {
+                        sh """
+                        kubectl get pods --namespace=afcen -l app=node-test || true
+                        kubectl describe deployment node-test --namespace=afcen || true
+                        """
+                    }
+                } catch (Exception e) {
+                    echo "Could not retrieve cluster status: ${e.getMessage()}"
+                }
+            }
+        }
+        always {
+            echo 'Pipeline execution completed.'
+            sh 'docker system prune -f || true'
+        }
+    }
+}
+
+    post {
+        success {
+            echo '🎉 Pipeline completed successfully!'
+            echo "Application deployed to: ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${DOCKER_IMAGE}:${DOCKER_TAG}"
+            echo "Service available on NodePort: Check kubectl get svc node-test-service"
+        }
+        failure {
+            echo '❌ Pipeline failed!'
+            script {
+                echo "Checking cluster status for debugging..."
+                try {
+                    sh '''
+                    # Ensure kubectl is available for debugging
+                    if ! command -v kubectl &> /dev/null; then
+                        echo "Installing kubectl for debugging..."
+                        mkdir -p ~/bin
+                        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                        chmod +x kubectl
+                        mv kubectl ~/bin/
+                        export PATH="$HOME/bin:$PATH"
+                        echo "kubectl installed for debugging to ~/bin"
+                    fi
+                    '''
+                    withKubeConfig([credentialsId: 'kubeconfig', restrictKubeConfigAccess: false]) {
+                        sh """
+                        export PATH="\$HOME/bin:\$PATH"
+                        kubectl get pods --namespace=${K8S_NAMESPACE} -l app=${APP_LABEL} || true
+                        kubectl describe deployment ${DEPLOYMENT_NAME} --namespace=${K8S_NAMESPACE} || true
+                        """
+                    }
+                } catch (Exception e) {
+                    echo "Could not retrieve cluster status: ${e.getMessage()}"
+                }
+            }
+        }
+        always {
+            echo 'Pipeline execution completed.'
+            sh 'docker system prune -f || true'
+        }
+    }
+}

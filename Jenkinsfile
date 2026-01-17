@@ -1,199 +1,40 @@
-pipeline {
-    agent any
+// Test Jenkinsfile for Docker deployment
+// This demonstrates how to use the dockerPipeline function from the shared library
 
-    environment {
-        DOCKER_REGISTRY = 'ghcr.io'
-        DOCKER_USERNAME = 'safari-bayes'
-        DOCKER_IMAGE = 'node-app'
-        K8S_NAMESPACE = 'afcen'
-        DEPLOYMENT_NAME = 'node-test'
-        APP_LABEL = 'node-test'
-        DOCKER_TAG = "${env.BUILD_NUMBER ?: 'latest'}"
-    }
+@Library('shared-jenkins-library') _
 
-    options {
-        timeout(time: 30, unit: 'MINUTES')
-        disableConcurrentBuilds()
-    }
+dockerPipeline(
+    dockerImage: 'test-app-final',
+    appPort: '50800',
+    containerName: 'test-app-final',
+    deployTo: 'kubernetes', // Enable Kubernetes deployment
+    infisicalPath: '/afcen-landing-page/',
+    deploymentMethod: 'docker-run', // Switch to standard Docker build for K8s
+    healthCheckWait: '30',
+    cleanupOldImages: true,
+    keepImageVersions: '3',
+    project: 'afcen',
+    healthCheckUrl: '/health',
+    technology: 'nextjs',
+    
+    // Security & Quality
+    sonarScan: true,
+    sonarProjectKey: 'test-project',
+    sonarProjectName: 'Test Project (Next.js)',
+    securityScan: true,
+    failOnSecurity: true,  // Set to false for initial test to see all results
+    trivySeverity: 'CRITICAL,HIGH',
+    dockerRegistry: 'ghcr.io',
+    dockerRegistryUser: 'safari-bayes',
+    dockerRegistryCredentialsId: 'Token', // Jenkins credential ID for registry
+    k8sNamespace: 'afcen',
+    k8sDeployment: 'node-test',
+    k8sAppLabel: 'node-test',
+    k8sCredentialsId: 'kubeconfig' // Jenkins credential ID for kubeconfig
+)
 
+// Note: This test requires:ssnszgssasassss
+// - Dockerfile.test (test Dockerfile)azasssasa
+// - docker-compose.test.yml (rename to docker-compsose.ysml or use -f flag)
+// - .env file (will be created from Infisical)
 
-
-    stages {
-        stage('Checkout') {
-            steps {
-                echo 'Checking out source code...'
-                checkout scm
-            }
-        }
-
-        stage('Build') {
-            steps {
-                echo 'Building Node.js application...'
-                sh '''
-                if [ -f package.json ]; then
-                    echo "Node.js app detected - installing dependencies"
-                    npm install
-                    echo "Dependencies installed successfully"
-                else
-                    echo "No package.json found - skipping npm install"
-                fi
-                '''
-            }
-        }
-
-        stage('Docker Build') {
-            steps {
-                echo 'Building Docker image...'
-                sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${DOCKER_IMAGE}:${DOCKER_TAG} ."
-                sh "docker tag ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${DOCKER_IMAGE}:latest"
-                echo "Docker image built successfully: ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${DOCKER_IMAGE}:${DOCKER_TAG}"
-            }
-        }
-
-        stage('Docker Push') {
-            steps {
-                echo 'Pushing Docker image to registry...'
-                withCredentials([usernamePassword(credentialsId: 'Token', usernameVariable: 'DUMMY_USER', passwordVariable: 'DOCKER_TOKEN')]) {
-                    sh """
-                    echo "\$DOCKER_TOKEN" | docker login \$DOCKER_REGISTRY -u "\$DOCKER_USERNAME" --password-stdin
-                    echo "Docker login successful"
-                    docker push \${DOCKER_REGISTRY}/\${DOCKER_USERNAME}/\${DOCKER_IMAGE}:\${DOCKER_TAG}
-                    docker push \${DOCKER_REGISTRY}/\${DOCKER_USERNAME}/\${DOCKER_IMAGE}:latest
-                    echo "Docker images pushed successfully"
-                    """
-                }
-            }
-        }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                echo 'Deploying to Kubernetes cluster...'
-                sh '''
-                # Install kubectl if not present
-                if ! command -v kubectl &> /dev/null; then
-                    echo "Installing kubectl..."
-                    mkdir -p ~/bin
-                    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-                    chmod +x kubectl
-                    mv kubectl ~/bin/
-                    export PATH="$HOME/bin:$PATH"
-                    echo "kubectl installed successfully to ~/bin"
-                else
-                    echo "kubectl already available"
-                fi
-                '''
-                withCredentials([usernamePassword(credentialsId: 'Token', usernameVariable: 'DUMMY_USER', passwordVariable: 'DOCKER_TOKEN')]) {
-                    withKubeConfig([credentialsId: 'kubeconfig', restrictKubeConfigAccess: false]) {
-                        sh """
-                        export PATH="\$HOME/bin:\$PATH"
-                        echo "Creating namespace if it doesn't exist..."
-                        kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
-
-                        echo "Creating image pull secret in namespace..."
-                        kubectl create secret docker-registry ghcr-secret \
-                          --docker-server=ghcr.io \
-                          --docker-username=samson-safari \
-                          --docker-password=\${DOCKER_TOKEN} \
-                          --namespace=${K8S_NAMESPACE} \
-                          --dry-run=client -o yaml | kubectl apply -f - || \
-                        echo "Image pull secret already exists or failed to create"
-
-                        echo "Applying Kubernetes manifests..."
-                        kubectl apply -f node-deployment.yaml --namespace=${K8S_NAMESPACE}
-                        kubectl apply -f node-service.yaml --namespace=${K8S_NAMESPACE}
-
-                        echo "Updating deployment image..."
-                        kubectl set image deployment/${DEPLOYMENT_NAME} ${DEPLOYMENT_NAME}=${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${DOCKER_IMAGE}:${DOCKER_TAG} --namespace=${K8S_NAMESPACE}
-
-                        echo "Waiting for rollout to complete..."
-                        kubectl rollout status deployment/${DEPLOYMENT_NAME} --namespace=${K8S_NAMESPACE} --timeout=300s
-                        """
-                    }
-                }
-            }
-        }
-
-        stage('Verify Deployment') {
-            steps {
-                echo 'Verifying deployment...'
-                sh '''
-                # Ensure kubectl is available
-                if ! command -v kubectl &> /dev/null; then
-                    echo "Installing kubectl..."
-                    mkdir -p ~/bin
-                    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-                    chmod +x kubectl
-                    mv kubectl ~/bin/
-                    export PATH="$HOME/bin:$PATH"
-                    echo "kubectl installed successfully to ~/bin"
-                fi
-                '''
-                withKubeConfig([credentialsId: 'kubeconfig', restrictKubeConfigAccess: false]) {
-                    sh """
-                    export PATH="\$HOME/bin:\$PATH"
-                    echo "Checking pod status..."
-                    kubectl get pods --namespace=${K8S_NAMESPACE} -l app=${APP_LABEL}
-
-                    echo "Checking service status..."
-                    kubectl get svc --namespace=${K8S_NAMESPACE} -l app=${APP_LABEL}
-
-                    echo "Testing service endpoint..."
-                    kubectl get svc node-test-service --namespace=${K8S_NAMESPACE} -o jsonpath='{.spec.ports[0].nodePort}'
-                    """
-                }
-            }
-        }
-
-        stage('Cleanup') {
-            steps {
-                echo 'Cleaning up local Docker images...'
-                sh """
-                docker rmi ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${DOCKER_IMAGE}:${DOCKER_TAG} || true
-                docker rmi ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${DOCKER_IMAGE}:latest || true
-                echo "Cleanup completed"
-                """
-            }
-        }
-    }
-
-    post {
-        success {
-            echo '🎉 Pipeline completed successfully!'
-            echo "Application deployed to: ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${DOCKER_IMAGE}:${DOCKER_TAG}"
-            echo "Service available on NodePort: Check kubectl get svc node-test-service"
-        }
-        failure {
-            echo '❌ Pipeline failed!'
-            script {
-                echo "Checking cluster status for debugging..."
-                try {
-                    sh '''
-                    # Ensure kubectl is available for debugging
-                    if ! command -v kubectl &> /dev/null; then
-                        echo "Installing kubectl for debugging..."
-                        mkdir -p ~/bin
-                        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-                        chmod +x kubectl
-                        mv kubectl ~/bin/
-                        export PATH="$HOME/bin:$PATH"
-                        echo "kubectl installed for debugging to ~/bin"
-                    fi
-                    '''
-                    withKubeConfig([credentialsId: 'kubeconfig', restrictKubeConfigAccess: false]) {
-                        sh """
-                        export PATH="\$HOME/bin:\$PATH"
-                        kubectl get pods --namespace=${K8S_NAMESPACE} -l app=${APP_LABEL} || true
-                        kubectl describe deployment ${DEPLOYMENT_NAME} --namespace=${K8S_NAMESPACE} || true
-                        """
-                    }
-                } catch (Exception e) {
-                    echo "Could not retrieve cluster status: ${e.getMessage()}"
-                }
-            }
-        }
-        always {
-            echo 'Pipeline execution completed.'
-            sh 'docker system prune -f || true'
-        }
-    }
-}
