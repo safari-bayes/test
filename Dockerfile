@@ -1,4 +1,9 @@
-FROM node:18-alpine
+FROM node:22-alpine
+
+# Update system packages and npm to fix vulnerabilities
+RUN apk update && apk upgrade && \
+    npm install -g npm@latest && \
+    rm -rf /var/cache/apk/*
 
 WORKDIR /app
 
